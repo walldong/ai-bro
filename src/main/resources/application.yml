@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: ai-bro
+server:
+  port: 8088
+---
+#spring:
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    initialize: true
+##    url: jdbc:mysql://ouyanghd-p1.grandsoft.com.cn:3306/ai_bro?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+#    url:  jdbc:mysql://ouyanghd-p1.grandsoft.com.cn:3306/ai_bro?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&autoReconnect=true
+#    username: root
+#    password: 123456
+spring:
+  datasource:
+    username: postgres
+    password: postgres
+    url: jdbc:postgresql://localhost/vector_store
+---
+spring:
+  ai:
+    ollama:
+      init:
+        pull-model-strategy: never
+        chat:
+          additional-models:
+            - llama3.2
+        embedding:
+          additional-models:
+            - nomic-embed-text
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: llama3.2
+          temperature: 0.7
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 1536
+---
+spring:
+  servlet:
+    multipart:
+      max-file-size: 1000MB
+      max-request-size: 1000MB
