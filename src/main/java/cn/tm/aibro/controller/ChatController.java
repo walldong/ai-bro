@@ -19,7 +19,7 @@ public class ChatController {
         return chatService.simpleChat(message);
     }
 
-    @GetMapping("/")
+    @GetMapping("/rag")
     public String chat(@RequestParam String message) {
         return chatService.chatByVectorStore(message);
     }

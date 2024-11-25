@@ -1,6 +1,7 @@
 package cn.tm.aibro.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService {
@@ -43,6 +45,7 @@ public class ChatService {
     public String chatByVectorStore(String message) {
         // 根据问题文本进行相似性搜索
         List<Document> listOfSimilarDocuments = vectorStore.similaritySearch(message);
+        log.info("相似度搜索结果: {}", listOfSimilarDocuments);
         // 将Document列表中每个元素的content内容进行拼接获得documents
         String documents = listOfSimilarDocuments.stream().map(Document::getContent).collect(Collectors.joining());
         // 使用Spring AI 提供的模板方式构建SystemMessage对象
