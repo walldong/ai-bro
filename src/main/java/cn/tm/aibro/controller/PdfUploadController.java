@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.http.HttpResponse.ResponseInfo;
 import java.util.List;
 
 @Controller
@@ -17,8 +18,8 @@ public class PdfUploadController {
     private final PdfStoreService pdfStoreService;
 
     @PostMapping("/upload")
-    public void upload(@RequestParam MultipartFile file) {
-        pdfStoreService.saveSource(file);
+    public ResponseInfo upload(@RequestParam MultipartFile file) {
+        return pdfStoreService.saveSource(file);
     }
 
     @PostMapping("/upload/files")

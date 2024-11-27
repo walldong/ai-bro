@@ -1,6 +1,7 @@
 package cn.tm.aibro.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.reader.ExtractedTextFormatter;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 import org.springframework.ai.reader.pdf.ParagraphPdfDocumentReader;
@@ -10,13 +11,18 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.http.HttpClient;
+import java.net.http.HttpHeaders;
+import java.net.http.HttpResponse.ResponseInfo;;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PdfStoreService {
@@ -78,7 +84,8 @@ public class PdfStoreService {
      * MultipartFile对象存储，采用PagePdfDocumentReader
      * @param file
      */
-    public void saveSource(MultipartFile file){
+    @Async
+    public ResponseInfo saveSource(MultipartFile file){
         try {
             // 获取文件名
             String fileName = file.getOriginalFilename();
@@ -104,9 +111,26 @@ public class PdfStoreService {
                     .build();
             PagePdfDocumentReader pagePdfDocumentReader = new PagePdfDocumentReader(fileResource, loadConfig);
             vectorStore.accept(tokenTextSplitter.apply(pagePdfDocumentReader.get()));
+            log.info("文件上传成功");
+            return new ResponseInfo() {
+                @Override
+                public int statusCode() {
+                    return 200;
+                }
+
+                @Override
+                public HttpHeaders headers() {
+                    return null;
+                }
+
+                @Override
+                public HttpClient.Version version() {
+                    return null;
+                }
+            };
         }catch (IOException e){
             e.printStackTrace();
         }
-
+        return null;
     }
 }
