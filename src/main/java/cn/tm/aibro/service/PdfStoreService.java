@@ -2,15 +2,20 @@ package cn.tm.aibro.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.embedding.EmbeddingResponse;
 import org.springframework.ai.reader.ExtractedTextFormatter;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 import org.springframework.ai.reader.pdf.ParagraphPdfDocumentReader;
 import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+import org.springframework.ai.vectorstore.PgVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +26,7 @@ import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse.ResponseInfo;;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -31,11 +37,18 @@ public class PdfStoreService {
     private final VectorStore vectorStore;
     private final TokenTextSplitter tokenTextSplitter;
 
+    @Autowired
+    private EmbeddingModel embeddingModel;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     /**
      * 根据PDF的页数进行分割
+     *
      * @param url
      */
-    public void saveSourceByPage(String url){
+    public void saveSourceByPage(String url) {
         // 加载资源，需要本地路径的信息
         Resource resource = resourceLoader.getResource(url);
         // 加载PDF文件时的配置对象
@@ -57,9 +70,10 @@ public class PdfStoreService {
 
     /**
      * 根据PDF的目录（段落）进行划分
+     *
      * @param url
      */
-    public void saveSourceByParagraph(String url){
+    public void saveSourceByParagraph(String url) {
         Resource resource = resourceLoader.getResource(url);
 
         PdfDocumentReaderConfig loadConfig = PdfDocumentReaderConfig.builder()
@@ -82,10 +96,10 @@ public class PdfStoreService {
 
     /**
      * MultipartFile对象存储，采用PagePdfDocumentReader
+     *
      * @param file
      */
-    @Async
-    public ResponseInfo saveSource(MultipartFile file){
+    public ResponseInfo saveSource(MultipartFile file) {
         try {
             // 获取文件名
             String fileName = file.getOriginalFilename();
@@ -110,8 +124,10 @@ public class PdfStoreService {
                     .withPagesPerDocument(1)
                     .build();
             PagePdfDocumentReader pagePdfDocumentReader = new PagePdfDocumentReader(fileResource, loadConfig);
-            vectorStore.accept(tokenTextSplitter.apply(pagePdfDocumentReader.get()));
+            VectorStore pgVectorStore = new PgVectorStore(jdbcTemplate, embeddingModel);
+            pgVectorStore.accept(tokenTextSplitter.apply(pagePdfDocumentReader.get()));
             log.info("文件上传成功");
+            Files.deleteIfExists(tempFile);
             return new ResponseInfo() {
                 @Override
                 public int statusCode() {
@@ -128,7 +144,7 @@ public class PdfStoreService {
                     return null;
                 }
             };
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
