@@ -2,6 +2,7 @@ package cn.tm.aibro.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.embedding.EmbeddingResponse;
 import org.springframework.ai.reader.ExtractedTextFormatter;
@@ -125,6 +126,10 @@ public class PdfStoreService {
                     .build();
             PagePdfDocumentReader pagePdfDocumentReader = new PagePdfDocumentReader(fileResource, loadConfig);
             VectorStore pgVectorStore = new PgVectorStore(jdbcTemplate, embeddingModel);
+            List<Document> documents = pagePdfDocumentReader.get();
+            for (Document document : documents){
+                log.info(document.getContent());
+            }
             pgVectorStore.accept(tokenTextSplitter.apply(pagePdfDocumentReader.get()));
             log.info("文件上传成功");
             Files.deleteIfExists(tempFile);

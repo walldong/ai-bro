@@ -25,14 +25,14 @@ spring:
         pull-model-strategy: never
         chat:
           additional-models:
-            - llama3.2
+            - qwen2.5:3b
         embedding:
           additional-models:
             - nomic-embed-text
       base-url: http://localhost:11434
       chat:
         options:
-          model: llama3.2
+          model: qwen2.5:3b
           temperature: 0.7
     vectorstore:
       pgvector:
@@ -45,3 +45,5 @@ spring:
     multipart:
       max-file-size: 1000MB
       max-request-size: 1000MB
+---
+logging.level.org.springframework.ai.chat.client.advisor: DEBUG
