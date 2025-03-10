@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
-import org.springframework.ai.embedding.;
 
 @RestController
 class AIController {
@@ -38,8 +37,7 @@ class AIController {
         return Map.of("completion", this.chatClient
                 .prompt()
                 .advisors(
-                        new SimpleLoggerAdvisor(),
-                        new MessageChatMemoryAdvisor()
+                        new SimpleLoggerAdvisor()
                 ).
                 user(message).
                 call().
