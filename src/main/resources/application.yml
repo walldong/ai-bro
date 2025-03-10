@@ -4,14 +4,6 @@ spring:
 server:
   port: 8088
 ---
-#spring:
-#  datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    initialize: true
-##    url: jdbc:mysql://ouyanghd-p1.grandsoft.com.cn:3306/ai_bro?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
-#    url:  jdbc:mysql://ouyanghd-p1.grandsoft.com.cn:3306/ai_bro?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&autoReconnect=true
-#    username: root
-#    password: 123456
 spring:
   datasource:
     username: postgres
